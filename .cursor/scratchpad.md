@@ -55,48 +55,12 @@ Use HRLDAS as the superproject with a single `noahmp/` submodule; create and dev
 - Environment config
   - `hrldas/env/modules.sh` (module loads for Derecho/Casper)
 
-### Hardened Job Templates (Derecho/Casper)
+### Useful Git Commands
 
-Slurm (Derecho) — Noah‑MP CPU run with provenance
-```bash
-#!/bin/bash
-#SBATCH -J noahmp
-#SBATCH -A <account>
-#SBATCH -N 1
-#SBATCH -t 02:00:00
-RUN_ID=$(date +%Y%m%d_%H%M%S)
-SCR=/glade/derecho/scratch/$USER/noahmp/runs/$RUN_ID
-WRK=/glade/work/$USER/noahmp
-mkdir -p "$SCR" "$WRK/results"
-cp -r "$WRK/inputs" "$SCR"
-cd "$SCR"
-# srun ./noahmp.exe ...
-rsync -av output/ "$WRK/results/$RUN_ID/"
-```
-
-PBS (Derecho) — ML GPU training with provenance
-```bash
-#!/bin/bash
-#PBS -N noahmp_ml
-#PBS -A <account>
-#PBS -q derecho
-#PBS -l select=1:ncpus=16:ngpus=1:mem=64GB
-#PBS -l walltime=02:00:00
-set -euo pipefail
-module load conda || true
-source activate noahmp-ml || conda activate noahmp-ml || true
-
-EXP=$(date +%Y%m%d_%H%M%S)
-SCR=/glade/derecho/scratch/$USER/ml/experiments/$EXP
-WRK=/glade/work/$USER/ml
-mkdir -p "$SCR" "$WRK/checkpoints"
-rsync -a "$WRK/datasets/" "$SCR/datasets/"
-cd "$SCR"
-
-# Example training
-python -m train --data ./datasets --out ./outputs
-rsync -av "$SCR/outputs/best.ckpt" "$WRK/checkpoints/$EXP.ckpt"
-```
+- **List worktrees:** `git worktree list`
+- **Add a worktree:** `git worktree add <path> <branch>`
+- **Remove a worktree:** `git worktree remove <path>`
+- **Prune worktree metadata:** `git worktree prune`
 
 ### Reproducibility
 
@@ -105,6 +69,3 @@ rsync -av "$SCR/outputs/best.ckpt" "$WRK/checkpoints/$EXP.ckpt"
 ### Campaign Guidance (Placeholder)
 
 - Confirm root with CISL; suggested structure above. Campaign is not backed up and not for active training; use it to preserve curated datasets, released models, and manifests.
-
- 
-
