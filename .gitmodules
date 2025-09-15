@@ -1,0 +1,3 @@
+[submodule "noahmp"]
+	path = noahmp
+	url = https://github.com/ktwu01/noahmp
