@@ -63,54 +63,40 @@ Use HRLDAS as the superproject with a single `noahmp/` submodule; create and dev
 - **Remove a worktree:** `git worktree remove <path>`
 - **Prune worktree metadata:** `git worktree prune`
 
-### Verification Summary (2025-09-15)
+### Submodule管理注意事项 - "打地鼠"现象
 
-- HRLDAS main: pinned to b0e8fa4 on noahmp main (fork/main from upstream master)
-- HRLDAS wood: pinned to 232fc41 on noahmp feature/wood
-- HRLDAS rock: pinned to 81f8c2f on noahmp feature/rock
-- HRLDAS ai: pinned to d28226d on noahmp feature/ai
+**现象描述：**
+在一个worktree中更新NoahMP submodule后，其他worktree会显示"submodule有新提交可用"的提示，就像打地鼠一样此起彼伏。
 
-All attached and matching scratchpad mappings.
+**原因分析：**
+1. **共享.git目录**: 所有worktree共享同一个`.git`目录，包括submodule的引用信息
+2. **Git检测机制**: Git会检测到fork上有新提交，并提示"可更新"
+3. **正常现象**: 这是git worktree + submodule组合的预期行为，不是bug
 
-**Bugs Resolved During Verification:**
-1. **Detached HEAD in `hrldas-ai` submodule:** The `noahmp` submodule was pinned to an old commit (232fc41) while the branch had moved to a newer commit (8cc3904). Fixed by deinitializing and re-adding the submodule directly from the fork with proper branch tracking.
+**最佳实践指南：**
 
-2. **Submodule pointer mismatches:** Both `hrldas-ai` and `hrldas-rock` had "new commits" status (indicated by '+' prefix in `git submodule status`) where the submodule had moved ahead of the recorded commit in the superproject. Fixed by committing the updated submodule pointers to synchronize the pinning.
+**✅ 正确的做法：**
+- 忽略其他worktree中的"new commits available"提示
+- 只在当前工作的worktree中进行submodule更新
+- 使用`git submodule status`确认当前worktree的pinning状态
+- 每个worktree保持其独立的submodule版本
 
-3. **Remote configuration issues:** Some worktrees had incorrect remotes pointing to `NCAR/noahmp` instead of the user's fork. Fixed by setting proper remotes: `origin`→NCAR (upstream), `fork`→ktwu01 (personal fork).
+**❌ 避免的操作：**
+- 不要在所有worktree中都运行`git submodule update`
+- 不要试图"同步"所有worktree的submodule到同一版本
+- 不要因为看到提示就强制更新不相关的worktree
 
-**What to Notice:**
-- Use `git submodule status` to verify pinning - no '-' (detached) or '+' (ahead) prefixes should appear
-- When re-pinning submodules, always commit the pointer change in the superproject
-- Submodule branches should track `fork/feature/*` not `origin/feature/*` for development work
-- The verification process revealed that submodule management requires careful attention to both the submodule state and the superproject's recorded pointer
+**诊断命令：**
+```bash
+# 检查当前worktree的submodule状态（无前缀 = 正常）
+git submodule status
 
-### Project Status Board
+# 检查submodule的当前分支
+cd noahmp && git branch --show-current
 
-- **HRLDAS Superproject Setup**
-  - [x] Create `wood`, `rock`, `ai` branches. (Completed on 2025-09-15)
-  - [x] Create worktrees at `/glade/u/home/wukoutian/hrldas-{wood,rock,ai}`. (Completed on 2025-09-15)
+# 确认pinning是否正确
+cd .. && git ls-tree HEAD noahmp
+```
 
-- **Noah-MP Submodule Setup**
-  - [x] **Task 1: Create `noahmp` feature branches.** (Completed on 2025-09-15)
-    - **Description:** For each variant (`wood`, `rock`, `ai`), navigate into the corresponding worktree's `noahmp/` directory, create a new feature branch (e.g., `feature/wood`), and push it to the personal fork.
-    - **Success Criteria:** The `feature/wood`, `feature/rock`, and `feature/ai` branches exist on the `noahmp` submodule's remote fork.
-
-- **Submodule Pinning**
-  - [x] **Task 2: Pin HRLDAS branches to submodule commits.** (Completed on 2025-09-15)
-    - **Description:** In each HRLDAS worktree (e.g., `hrldas-wood`), update the submodule pointer to track the corresponding `noahmp` feature branch (e.g., `feature/wood`) and commit this change.
-    - **Success Criteria:** Running `git submodule status` in each HRLDAS worktree shows the `noahmp` submodule pointing to the correct feature branch commit.
-
-- **Branch Verification and Alignment**
-  - [x] **Task 3: Verify `noahmp` branches across worktrees.** (Completed on 2025-09-15)
-    - **Description:** In each worktree (`hrldas-{wood,rock,ai}`), run `git fetch --all` inside `noahmp/` and confirm `feature/{wood,rock,ai}` exists and is checked out; confirm remotes (`origin`→NCAR, `fork`→ktwu01) are correct.
-    - **Success Criteria:** `git branch -vv` shows the expected `feature/*` branch tracking `fork/feature/*` in each worktree.
-  - [x] **Task 4: Create `main` branch in fork (alias to upstream master).** (Completed on 2025-09-15)
-    - **Description:** In `ktwu01/noahmp` fork, create `main` that points to `NCAR/noahmp:master` (keep `master` to match upstream); optionally set HRLDAS `main` submodule to track `fork/main` to reduce naming confusion.
-    - **Success Criteria:** `main` exists on `ktwu01/noahmp`; if opted, `hrldas` `main` submodule points to a commit reachable from `fork/main`.
-  - [x] **Task 5: Publish HRLDAS `wood` branch.** (Completed on 2025-09-15)
-    - **Description:** Ensure `hrldas-wood` worktree is clean and push branch `wood` to remote (no submodule changes beyond pinned pointer).
-    - **Success Criteria:** `git status` clean in `/glade/u/home/wukoutian/hrldas-wood`; `git push -u origin wood` succeeds.
-  - [x] **Task 6: Diagnose `feature/rock` git status issue.** (Completed on 2025-09-15)
-    - **Description:** In `/glade/u/home/wukoutian/hrldas-rock`, run `git status`, `git submodule status`, and resolve any staged/unstaged changes or detached pointers; ensure submodule tracks `fork/feature/rock` and commit if needed.
-    - **Success Criteria:** `git status` clean; submodule pointer correct; branch tracks remote; ready to push.
+**处理原则：**
+每个worktree的submodule版本应该独立管理，"new commits"提示可以安全忽略，只要当前worktree的功能开发正常进行即可。
