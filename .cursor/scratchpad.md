@@ -63,6 +63,28 @@ Use HRLDAS as the superproject with a single `noahmp/` submodule; create and dev
 - **Remove a worktree:** `git worktree remove <path>`
 - **Prune worktree metadata:** `git worktree prune`
 
+### Verification Summary (2025-09-15)
+
+- HRLDAS main: pinned to b0e8fa4 on noahmp main (fork/main from upstream master)
+- HRLDAS wood: pinned to 232fc41 on noahmp feature/wood
+- HRLDAS rock: pinned to 81f8c2f on noahmp feature/rock
+- HRLDAS ai: pinned to d28226d on noahmp feature/ai
+
+All attached and matching scratchpad mappings.
+
+**Bugs Resolved During Verification:**
+1. **Detached HEAD in `hrldas-ai` submodule:** The `noahmp` submodule was pinned to an old commit (232fc41) while the branch had moved to a newer commit (8cc3904). Fixed by deinitializing and re-adding the submodule directly from the fork with proper branch tracking.
+
+2. **Submodule pointer mismatches:** Both `hrldas-ai` and `hrldas-rock` had "new commits" status (indicated by '+' prefix in `git submodule status`) where the submodule had moved ahead of the recorded commit in the superproject. Fixed by committing the updated submodule pointers to synchronize the pinning.
+
+3. **Remote configuration issues:** Some worktrees had incorrect remotes pointing to `NCAR/noahmp` instead of the user's fork. Fixed by setting proper remotes: `origin`→NCAR (upstream), `fork`→ktwu01 (personal fork).
+
+**What to Notice:**
+- Use `git submodule status` to verify pinning - no '-' (detached) or '+' (ahead) prefixes should appear
+- When re-pinning submodules, always commit the pointer change in the superproject
+- Submodule branches should track `fork/feature/*` not `origin/feature/*` for development work
+- The verification process revealed that submodule management requires careful attention to both the submodule state and the superproject's recorded pointer
+
 ### Project Status Board
 
 - **HRLDAS Superproject Setup**
@@ -86,9 +108,9 @@ Use HRLDAS as the superproject with a single `noahmp/` submodule; create and dev
   - [x] **Task 4: Create `main` branch in fork (alias to upstream master).** (Completed on 2025-09-15)
     - **Description:** In `ktwu01/noahmp` fork, create `main` that points to `NCAR/noahmp:master` (keep `master` to match upstream); optionally set HRLDAS `main` submodule to track `fork/main` to reduce naming confusion.
     - **Success Criteria:** `main` exists on `ktwu01/noahmp`; if opted, `hrldas` `main` submodule points to a commit reachable from `fork/main`.
-  - [ ] **Task 5: Publish HRLDAS `wood` branch.**
+  - [x] **Task 5: Publish HRLDAS `wood` branch.** (Completed on 2025-09-15)
     - **Description:** Ensure `hrldas-wood` worktree is clean and push branch `wood` to remote (no submodule changes beyond pinned pointer).
     - **Success Criteria:** `git status` clean in `/glade/u/home/wukoutian/hrldas-wood`; `git push -u origin wood` succeeds.
-  - [ ] **Task 6: Diagnose `feature/rock` git status issue.**
+  - [x] **Task 6: Diagnose `feature/rock` git status issue.** (Completed on 2025-09-15)
     - **Description:** In `/glade/u/home/wukoutian/hrldas-rock`, run `git status`, `git submodule status`, and resolve any staged/unstaged changes or detached pointers; ensure submodule tracks `fork/feature/rock` and commit if needed.
     - **Success Criteria:** `git status` clean; submodule pointer correct; branch tracks remote; ready to push.
