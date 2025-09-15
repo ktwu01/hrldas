@@ -42,18 +42,19 @@ Use HRLDAS as the superproject with a single `noahmp/` submodule; create and dev
 └── hrldas-ai/                     # AI variant worktree
     └── noahmp/
 
-- HRLDAS (superproject)
-  - `main` → `noahmp` @ `NCAR/noahmp:develop` (baseline)
-  - `wood` → `noahmp` @ `fork/feature/wood`
-  - `rock` → `noahmp` @ `fork/feature/rock`
-  - `ai`   → `noahmp` @ `fork/feature/ai`
+- HRLDAS (superproject → submodule mapping)
+  - HRLDAS branch `main` pins submodule `noahmp` to `fork/main` (baseline from upstream `master`)
+  - HRLDAS branch `wood` pins submodule `noahmp` to `fork/feature/wood`
+  - HRLDAS branch `rock` pins submodule `noahmp` to `fork/feature/rock`
+  - HRLDAS branch `ai`   pins submodule `noahmp` to `fork/feature/ai`
 - Worktrees
-  - `/glade/u/home/$USER/hrldas-main` (branch `main`)
+  - `/glade/u/home/$USER/hrldas` (branch `main`)
   - `/glade/u/home/$USER/hrldas-wood` (branch `wood`)
   - `/glade/u/home/$USER/hrldas-rock` (branch `rock`)
   - `/glade/u/home/$USER/hrldas-ai`   (branch `ai`)
 - Environment config
   - `hrldas/env/modules.sh` (module loads for Derecho/Casper)
+- **Important:** Do not delete `origin/master` branch - it contains important NCAR/upstream code that may be needed. (confirmed by KW 20250915)
 
 ### Useful Git Commands
 
@@ -62,10 +63,32 @@ Use HRLDAS as the superproject with a single `noahmp/` submodule; create and dev
 - **Remove a worktree:** `git worktree remove <path>`
 - **Prune worktree metadata:** `git worktree prune`
 
-### Reproducibility
+### Project Status Board
 
-- Use a conda/mamba env tracked by `environment.yml` or an Apptainer SIF image. Record toolchain, package versions, and checksums for promoted datasets/models.
+- **HRLDAS Superproject Setup**
+  - [x] Create `wood`, `rock`, `ai` branches. (Completed on 2025-09-15)
+  - [x] Create worktrees at `/glade/u/home/wukoutian/hrldas-{wood,rock,ai}`. (Completed on 2025-09-15)
 
-### Campaign Guidance (Placeholder)
+- **Noah-MP Submodule Setup**
+  - [x] **Task 1: Create `noahmp` feature branches.** (Completed on 2025-09-15)
+    - **Description:** For each variant (`wood`, `rock`, `ai`), navigate into the corresponding worktree's `noahmp/` directory, create a new feature branch (e.g., `feature/wood`), and push it to the personal fork.
+    - **Success Criteria:** The `feature/wood`, `feature/rock`, and `feature/ai` branches exist on the `noahmp` submodule's remote fork.
 
-- Confirm root with CISL; suggested structure above. Campaign is not backed up and not for active training; use it to preserve curated datasets, released models, and manifests.
+- **Submodule Pinning**
+  - [x] **Task 2: Pin HRLDAS branches to submodule commits.** (Completed on 2025-09-15)
+    - **Description:** In each HRLDAS worktree (e.g., `hrldas-wood`), update the submodule pointer to track the corresponding `noahmp` feature branch (e.g., `feature/wood`) and commit this change.
+    - **Success Criteria:** Running `git submodule status` in each HRLDAS worktree shows the `noahmp` submodule pointing to the correct feature branch commit.
+
+- **Branch Verification and Alignment**
+  - [x] **Task 3: Verify `noahmp` branches across worktrees.** (Completed on 2025-09-15)
+    - **Description:** In each worktree (`hrldas-{wood,rock,ai}`), run `git fetch --all` inside `noahmp/` and confirm `feature/{wood,rock,ai}` exists and is checked out; confirm remotes (`origin`→NCAR, `fork`→ktwu01) are correct.
+    - **Success Criteria:** `git branch -vv` shows the expected `feature/*` branch tracking `fork/feature/*` in each worktree.
+  - [x] **Task 4: Create `main` branch in fork (alias to upstream master).** (Completed on 2025-09-15)
+    - **Description:** In `ktwu01/noahmp` fork, create `main` that points to `NCAR/noahmp:master` (keep `master` to match upstream); optionally set HRLDAS `main` submodule to track `fork/main` to reduce naming confusion.
+    - **Success Criteria:** `main` exists on `ktwu01/noahmp`; if opted, `hrldas` `main` submodule points to a commit reachable from `fork/main`.
+  - [ ] **Task 5: Publish HRLDAS `wood` branch.**
+    - **Description:** Ensure `hrldas-wood` worktree is clean and push branch `wood` to remote (no submodule changes beyond pinned pointer).
+    - **Success Criteria:** `git status` clean in `/glade/u/home/wukoutian/hrldas-wood`; `git push -u origin wood` succeeds.
+  - [ ] **Task 6: Diagnose `feature/rock` git status issue.**
+    - **Description:** In `/glade/u/home/wukoutian/hrldas-rock`, run `git status`, `git submodule status`, and resolve any staged/unstaged changes or detached pointers; ensure submodule tracks `fork/feature/rock` and commit if needed.
+    - **Success Criteria:** `git status` clean; submodule pointer correct; branch tracks remote; ready to push.
