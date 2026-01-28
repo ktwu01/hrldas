@@ -28,37 +28,50 @@ Guideline: Stage inputs to Scratch for each run; write intermediates to Scratch;
 
 ### Git/worktree plan
 
-Use HRLDAS as the superproject with a single `noahmp/` submodule; create and develop Noah‑MP feature branches on your fork (`feature/wood`, `feature/rock`, `feature/ai`) for model changes; create thin HRLDAS branches (`main`, `wood`, `rock`, `ai`) and worktrees at `/glade/u/home/$USER/hrldas-{main,wood,rock,ai}` to pin each variant to a specific `noahmp` commit; in each worktree `git submodule update --init`, check out the target `noahmp` feature commit in detached HEAD, commit the submodule pointer, then build/run there; never create `noahmp_*` directories—always use `noahmp/`; push only to your fork; put build/output under Scratch per branch.
+Use HRLDAS as the superproject with a single `noahmp/` submodule. Use **simple 1:1 branch naming** between repos.
 
+**Branch Mapping (1:1 paired naming):**
+```
+ktwu01/hrldas          ktwu01/noahmp
+─────────────          ─────────────
+main            ────── main           (baseline)
+phs             ────── phs            (Plant Hydraulics)
+wood            ────── wood           (Wood variant)
+rock            ────── rock           (Rock variant)
+ai              ────── ai             (AI variant)
+```
+
+**Worktree Layout:**
+```
 /glade/u/home/wukoutian/
-├── hrldas/                        # Main worktree
+├── hrldas/                        # Main worktree (branch: main)
 │   ├── env/                       # Environment configs (versioned)
 │   │   └── modules.sh             # Module loads for Derecho/Casper
-│   └── noahmp/
-├── hrldas-wood/                   # Wood variant worktree
-│   └── noahmp/
-├── hrldas-rock/                   # Rock variant worktree
-│   └── noahmp/
-├── hrldas-ai/                     # AI variant worktree
-│   └── noahmp/
-└── hrldas-phs/                    # PHS variant worktree (baseline comparison: hrldas/main)
-    └── noahmp/
+│   └── noahmp/                    # Submodule pinned to fork/main
+├── hrldas-wood/                   # Wood variant (branch: wood)
+│   └── noahmp/                    # Submodule pinned to fork/wood
+├── hrldas-rock/                   # Rock variant (branch: rock)
+│   └── noahmp/                    # Submodule pinned to fork/rock
+├── hrldas-ai/                     # AI variant (branch: ai)
+│   └── noahmp/                    # Submodule pinned to fork/ai
+└── hrldas-phs/                    # PHS variant (branch: phs)
+    └── noahmp/                    # Submodule pinned to fork/phs
+```
 
-- HRLDAS (superproject → submodule mapping)
-  - HRLDAS branch `main` pins submodule `noahmp` to `fork/main` (baseline from upstream `master`)
-  - HRLDAS branch `wood` pins submodule `noahmp` to `fork/feature/wood`
-  - HRLDAS branch `rock` pins submodule `noahmp` to `fork/feature/rock`
-  - HRLDAS branch `ai`   pins submodule `noahmp` to `fork/feature/ai`
-  - HRLDAS branch `phs`   pins submodule `noahmp` to `fork/feature/phs` (baseline: main)
-- Worktrees
-  - `/glade/u/home/$USER/hrldas` (branch `main`)
-  - `/glade/u/home/$USER/hrldas-wood` (branch `wood`)
-  - `/glade/u/home/$USER/hrldas-rock` (branch `rock`)
-  - `/glade/u/home/$USER/hrldas-ai`   (branch `ai`)
-  - `/glade/u/home/$USER/hrldas-phs`   (branch `phs`) ↔ compare with main (no-PHS baseline)
-- Environment config
-  - `hrldas/env/modules.sh` (module loads for Derecho/Casper)
-- **Important:** Do not delete `origin/master` branch - it contains important NCAR/upstream code that may be needed. (confirmed by KW 20250915)
+**Remotes:**
+- `origin` = your fork (ktwu01/hrldas or ktwu01/noahmp)
+- `fork` = alias for noahmp fork (ktwu01/noahmp) in hrldas repo
+- NCAR upstream = reference only, don't sync unless needed
+
+**Rules:**
+- Always use simple branch names (no `feature/` prefix)
+- hrldas branch X → noahmp branch X (1:1 mapping)
+- Push only to your fork, never to NCAR upstream
+- Put build/output under Scratch per branch
+
+**Legacy branches (archived with `-legacy` suffix):**
+- hrldas: `master-legacy`, `rock-legacy`, `ai-legacy`, `test-noah-agent-rock-legacy`
+- noahmp: `master-legacy`
 
 ### Useful Git Commands
 
