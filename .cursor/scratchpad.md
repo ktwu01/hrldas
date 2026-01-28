@@ -39,7 +39,9 @@ Use HRLDAS as the superproject with a single `noahmp/` submodule; create and dev
 │   └── noahmp/
 ├── hrldas-rock/                   # Rock variant worktree
 │   └── noahmp/
-└── hrldas-ai/                     # AI variant worktree
+├── hrldas-ai/                     # AI variant worktree
+│   └── noahmp/
+└── hrldas-phs/                    # PHS variant worktree (baseline comparison: hrldas/main)
     └── noahmp/
 
 - HRLDAS (superproject → submodule mapping)
@@ -47,11 +49,13 @@ Use HRLDAS as the superproject with a single `noahmp/` submodule; create and dev
   - HRLDAS branch `wood` pins submodule `noahmp` to `fork/feature/wood`
   - HRLDAS branch `rock` pins submodule `noahmp` to `fork/feature/rock`
   - HRLDAS branch `ai`   pins submodule `noahmp` to `fork/feature/ai`
+  - HRLDAS branch `phs`   pins submodule `noahmp` to `fork/feature/phs` (baseline: main)
 - Worktrees
   - `/glade/u/home/$USER/hrldas` (branch `main`)
   - `/glade/u/home/$USER/hrldas-wood` (branch `wood`)
   - `/glade/u/home/$USER/hrldas-rock` (branch `rock`)
   - `/glade/u/home/$USER/hrldas-ai`   (branch `ai`)
+  - `/glade/u/home/$USER/hrldas-phs`   (branch `phs`) ↔ compare with main (no-PHS baseline)
 - Environment config
   - `hrldas/env/modules.sh` (module loads for Derecho/Casper)
 - **Important:** Do not delete `origin/master` branch - it contains important NCAR/upstream code that may be needed. (confirmed by KW 20250915)
