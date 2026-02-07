@@ -420,6 +420,14 @@ contains
           call get_from_restart(xstart, xend, xstart, ixfull, jxfull, "DUST5"   , NoahmpIO%DUST5XY  )
        endif
 
+       ! below for Plant Hydraulics (PHS) scheme (Li et al. 2021)
+       if (NoahmpIO%IOPT_BTR == 4) then
+          call get_from_restart(xstart, xend, xstart, ixfull, jxfull, "PHSPSIS" , NoahmpIO%PHSPSISXY)
+          call get_from_restart(xstart, xend, xstart, ixfull, jxfull, "PHSPSIL" , NoahmpIO%PHSPSILXY)
+          call get_from_restart(xstart, xend, xstart, ixfull, jxfull, "PHSWSS"  , NoahmpIO%PHSWSSXY )
+          call get_from_restart(xstart, xend, xstart, ixfull, jxfull, "PHSWSL"  , NoahmpIO%PHSWSLXY )
+       endif
+
        ! below for irrigation scheme
        if ( NoahmpIO%IOPT_IRR > 0 ) then
           call get_from_restart(xstart, xend, xstart, ixfull, jxfull, "IRNUMSI" , NoahmpIO%IRNUMSI  )
@@ -1521,6 +1529,14 @@ subroutine lsm_restart()
      call add_to_restart(NoahmpIO%DUST3XY   , "DUST3" , layers="SNOW")
      call add_to_restart(NoahmpIO%DUST4XY   , "DUST4" , layers="SNOW")
      call add_to_restart(NoahmpIO%DUST5XY   , "DUST5" , layers="SNOW")
+  endif
+
+  ! Plant Hydraulics (PHS) scheme (Li et al. 2021)
+  if (NoahmpIO%IOPT_BTR == 4) then
+     call add_to_restart(NoahmpIO%PHSPSISXY , "PHSPSIS")
+     call add_to_restart(NoahmpIO%PHSPSILXY , "PHSPSIL")
+     call add_to_restart(NoahmpIO%PHSWSSXY  , "PHSWSS" )
+     call add_to_restart(NoahmpIO%PHSWSLXY  , "PHSWSL" )
   endif
 
  ! irrigation scheme

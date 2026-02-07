@@ -155,6 +155,7 @@ OBJS = \
         ../../noahmp/src/SurfaceEmissivityMod.o \
         ../../noahmp/src/PsychrometricVariableMod.o \
         ../../noahmp/src/ResistanceGroundEvaporationMod.o \
+        ../../noahmp/src/PlantHydraulicsMod.o \
         ../../noahmp/src/SoilWaterTranspirationMod.o \
         ../../noahmp/src/AtmosForcingMod.o \
         ../../noahmp/src/PhenologyMainMod.o \
