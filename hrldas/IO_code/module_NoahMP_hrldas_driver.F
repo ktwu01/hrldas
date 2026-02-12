@@ -1182,6 +1182,7 @@ contains
               call add_to_output(NoahmpIO%LH         , "LH"      , "Total latent heat to atmosphere"      , "W/m2"                  )
               call add_to_output(NoahmpIO%ECANXY     , "ECAN"    , "Canopy water evaporation rate"        , "mm/s"                  )
               call add_to_output(NoahmpIO%ETRANXY    , "ETRAN"   , "Transpiration rate"                   , "mm/s"                  )
+              call add_to_output(NoahmpIO%VBTRANXY   , "VBTRAN"  , "Soil water transpiration factor"      , "1"                     )
               call add_to_output(NoahmpIO%EDIRXY     , "EDIR"    , "Direct from soil evaporation rate"    , "mm/s"                  )
               call add_to_output(NoahmpIO%ALBEDO     , "ALBEDO"  , "Surface albedo"                       , "-"                     )
             ! Grid water budget terms - in addition to above
