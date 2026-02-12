@@ -524,6 +524,67 @@ contains
 
 !---------------------------------------------------------------------------------------------------------
 
+  subroutine read_phs_setup(wrfinput_flnm, xstart, xend, ystart, yend, &
+                            iphtyp, spwai, spwvi, veght)
+    ! Read plant hydraulics setup fields from wrfinput file:
+    !   IPHTYP - plant hydraulics functional type (integer)
+    !   SPWAI  - sapwood area index [m2/m2]
+    !   SPWVI  - sapwood volume index [m3/m2]
+    !   VEGHT  - vegetation canopy height [m]
+    ! Fields not found remain unchanged (caller sets defaults).
+    implicit none
+    character(len=*),       intent(in)    :: wrfinput_flnm
+    integer,                intent(in)    :: xstart, xend, ystart, yend
+    integer,                dimension(xstart:xend,ystart:yend), intent(inout) :: iphtyp
+    real(kind=kind_noahmp), dimension(xstart:xend,ystart:yend), intent(inout) :: spwai
+    real(kind=kind_noahmp), dimension(xstart:xend,ystart:yend), intent(inout) :: spwvi
+    real(kind=kind_noahmp), dimension(xstart:xend,ystart:yend), intent(inout) :: veght
+
+    character(len=256) :: units
+    integer :: ierr, ncid
+    real(kind=kind_noahmp), dimension(xstart:xend,ystart:yend) :: xdum
+
+    ierr = nf90_open(wrfinput_flnm, NF90_NOWRITE, ncid)
+    if (ierr /= 0) return  ! silently skip if file cannot be opened
+
+    call get_2d_netcdf("IPHTYP", ncid, xdum, units, xstart, xend, ystart, yend, NOT_FATAL, ierr)
+    if (ierr == 0) then
+       iphtyp = nint(xdum)
+       print*, 'PHS: Read IPHTYP from wrfinput, value =', iphtyp(xstart,ystart)
+    else
+       print*, 'PHS: Did not find IPHTYP in wrfinput; will use IVGTYP for parameter lookup'
+    endif
+
+    call get_2d_netcdf("SPWAI", ncid, xdum, units, xstart, xend, ystart, yend, NOT_FATAL, ierr)
+    if (ierr == 0) then
+       spwai = xdum
+       print*, 'PHS: Read SPWAI from wrfinput, value =', spwai(xstart,ystart)
+    else
+       print*, 'PHS: Did not find SPWAI in wrfinput; will use table default for sapwood area index'
+    endif
+
+    call get_2d_netcdf("SPWVI", ncid, xdum, units, xstart, xend, ystart, yend, NOT_FATAL, ierr)
+    if (ierr == 0) then
+       spwvi = xdum
+       print*, 'PHS: Read SPWVI from wrfinput, value =', spwvi(xstart,ystart)
+    else
+       print*, 'PHS: Did not find SPWVI in wrfinput; will use table default for sapwood volume index'
+    endif
+
+    call get_2d_netcdf("VEGHT", ncid, xdum, units, xstart, xend, ystart, yend, NOT_FATAL, ierr)
+    if (ierr == 0) then
+       veght = xdum
+       print*, 'PHS: Read VEGHT from wrfinput, value =', veght(xstart,ystart)
+    else
+       print*, 'PHS: Did not find VEGHT in wrfinput; will use table default for canopy height'
+    endif
+
+    ierr = nf90_close(ncid)
+
+  end subroutine read_phs_setup
+
+!---------------------------------------------------------------------------------------------------------
+
   subroutine read_mmf_runoff(wrfinput_flnm,                            &
        xstart, xend,                                                   &
        ystart, yend,                                                   &

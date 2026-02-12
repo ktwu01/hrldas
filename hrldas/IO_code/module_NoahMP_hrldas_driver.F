@@ -320,6 +320,15 @@ contains
        call READ_URBAN_MAP(NoahmpIO%HRLDAS_SETUP_FILE, NoahmpIO%XSTART, NoahmpIO%XEND, NoahmpIO%YSTART, NoahmpIO%YEND, NoahmpIO%FRC_URB2D)
     endif
 
+!------------------------------------------------------------------------
+! For OPT_BTR=4 (PHS), read plant hydraulics setup from wrfinput
+!------------------------------------------------------------------------
+
+    if (NoahmpIO%IOPT_BTR == 4) then
+       call READ_PHS_SETUP(NoahmpIO%HRLDAS_SETUP_FILE, NoahmpIO%XSTART, NoahmpIO%XEND, NoahmpIO%YSTART, NoahmpIO%YEND, &
+                            NoahmpIO%IPHTYPXY, NoahmpIO%SPWAIXY, NoahmpIO%SPWVIXY, NoahmpIO%VEGHTXY)
+    endif
+
 !----------------------------------------------------------------------
 ! Initialize Model State
 !----------------------------------------------------------------------
