@@ -1,0 +1,14 @@
+# Build artifacts
+*.o
+*.mod
+*.exe
+*.a
+
+# Preprocessed Fortran
+*.f90
+
+# Build config (machine-specific)
+hrldas/user_build_options
+
+# Build logs
+*.log
