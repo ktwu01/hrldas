@@ -12,3 +12,8 @@ hrldas/user_build_options
 
 # Build logs
 *.log
+
+# Python
+__pycache__/
+*.pyc
+calibration/calibration_results*.csv
