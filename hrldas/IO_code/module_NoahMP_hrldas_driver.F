@@ -1192,12 +1192,14 @@ contains
               call add_to_output(NoahmpIO%ECANXY     , "ECAN"    , "Canopy water evaporation rate"        , "mm/s"                  )
               call add_to_output(NoahmpIO%ETRANXY    , "ETRAN"   , "Transpiration rate"                   , "mm/s"                  )
               call add_to_output(NoahmpIO%VBTRANXY   , "VBTRAN"  , "Soil water transpiration factor"      , "1"                     )
-              ! Plant Hydraulics (PHS) diagnostics (OPT_BTR=4)
-              call add_to_output(NoahmpIO%PHSPSILXY  , "VPSIL"   , "PHS leaf water potential"             , "mm"                    )
-              call add_to_output(NoahmpIO%PHSPSISXY  , "VPSIS"   , "PHS stem water potential"             , "mm"                    )
-              call add_to_output(NoahmpIO%VQS2LXY    , "VQS2L"   , "PHS sap flow rate"                    , "mm/s"                  )
-              call add_to_output(NoahmpIO%PHSWSSXY   , "VWSS"    , "PHS stem water storage"               , "mm"                    )
-              call add_to_output(NoahmpIO%PHSWSLXY   , "VWSL"    , "PHS leaf water storage"               , "mm"                    )
+              ! Plant Hydraulics (PHS) diagnostics — only written when OPT_BTR=4
+              if (NoahmpIO%IOPT_BTR == 4) then
+                 call add_to_output(NoahmpIO%PHSPSILXY  , "VPSIL"   , "PHS leaf water potential"          , "mm"                    )
+                 call add_to_output(NoahmpIO%PHSPSISXY  , "VPSIS"   , "PHS stem water potential"          , "mm"                    )
+                 call add_to_output(NoahmpIO%VQS2LXY    , "VQS2L"   , "PHS sap flow rate"                 , "mm/s"                  )
+                 call add_to_output(NoahmpIO%PHSWSSXY   , "VWSS"    , "PHS stem water storage"            , "mm"                    )
+                 call add_to_output(NoahmpIO%PHSWSLXY   , "VWSL"    , "PHS leaf water storage"            , "mm"                    )
+              endif
               call add_to_output(NoahmpIO%EDIRXY     , "EDIR"    , "Direct from soil evaporation rate"    , "mm/s"                  )
               call add_to_output(NoahmpIO%ALBEDO     , "ALBEDO"  , "Surface albedo"                       , "-"                     )
             ! Grid water budget terms - in addition to above
