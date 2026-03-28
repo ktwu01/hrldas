@@ -43,6 +43,20 @@ MODULE MODULE_MPP_LAND
      module procedure mpp_land_bcast_int2d 
      module procedure mpp_land_bcast_logical
   end interface
+  interface mpp_land_lr_com
+     module procedure MPP_LAND_LR_COM
+     module procedure MPP_LAND_LR_COM8
+  end interface
+
+  interface mpp_land_ub_com
+     module procedure MPP_LAND_UB_COM
+     module procedure MPP_LAND_UB_COM8
+  end interface
+
+  interface sum_real1
+     module procedure sum_real1_single
+     module procedure sum_real1_double
+  end interface
  
   contains
 
@@ -1787,22 +1801,22 @@ MODULE MODULE_MPP_LAND
      return 
   end  subroutine gather_1d_real_tmp
 
-  subroutine sum_real1(inout)
+  subroutine sum_real1_single(inout)
       implicit none
       real:: inout, send
       integer :: ierr
       send = inout
       CALL MPI_ALLREDUCE(send,inout,1,MPI_REAL,MPI_SUM,MPI_COMM_WORLD,ierr)
-  end subroutine sum_real1 
+  end subroutine sum_real1_single 
 
-  subroutine sum_double(inout)
+  subroutine sum_real1_double(inout)
       implicit none
       real*8:: inout, send
       integer :: ierr
       send = inout
       !yw CALL MPI_ALLREDUCE(send,inout,1,MPI_DOUBLE,MPI_SUM,MPI_COMM_WORLD,ierr)
       CALL MPI_ALLREDUCE(send,inout,1,MPI_DOUBLE_PRECISION,MPI_SUM,MPI_COMM_WORLD,ierr)
-  end subroutine sum_double
+  end subroutine sum_real1_double
 
   subroutine mpp_chrt_nlinks_collect(nlinks)
   ! collect the nlinks
