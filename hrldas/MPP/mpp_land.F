@@ -36,6 +36,7 @@ MODULE MODULE_MPP_LAND
      module procedure mpp_land_bcast_real2
      module procedure mpp_land_bcast_real_1d
      module procedure mpp_land_bcast_real1
+     module procedure mpp_land_bcast_double1
      module procedure mpp_land_bcast_char1d 
      module procedure mpp_land_bcast_char1
      module procedure mpp_land_bcast_int1 
@@ -869,6 +870,15 @@ MODULE MODULE_MPP_LAND
       call mpp_land_sync()
     return 
   end subroutine mpp_land_bcast_real1
+
+  subroutine mpp_land_bcast_double1(inout)
+      real*8 inout
+      integer ierr
+        call mpi_bcast(inout,1,MPI_DOUBLE_PRECISION,   &
+            IO_id,MPI_COMM_WORLD,ierr)
+      call mpp_land_sync()
+    return 
+  end subroutine mpp_land_bcast_double1
 
   subroutine mpp_land_bcast_real_1d(inout)
       integer len
@@ -1884,6 +1894,80 @@ MODULE MODULE_MPP_LAND
            endif
         end do
      end subroutine check_landreal3d
+
+  subroutine decompose_data_double(in_buff,out_buff)
+      real*8,intent(in), dimension(:,:) :: in_buff
+      real*8,intent(out), dimension(local_nx,local_ny) :: out_buff
+      integer tag, i, status, ierr,size
+      integer ibegin,iend,jbegin,jend
+
+      tag = 2
+      if(my_id .eq. IO_id) then
+         do i = 0, numprocs - 1
+            ibegin = startx(i+1)
+            iend   = startx(i+1)+local_nx_size(i+1) -1
+            jbegin = starty(i+1)
+            jend   = starty(i+1)+local_ny_size(i+1) -1
+          
+            if(my_id .eq. i) then
+               out_buff=in_buff(ibegin:iend,jbegin:jend)
+            else
+               size = local_nx_size(i+1)*local_ny_size(i+1)
+               call mpi_send(in_buff(ibegin:iend,jbegin:jend),size,&
+                  MPI_DOUBLE_PRECISION, i,tag,MPI_COMM_WORLD,ierr)
+            end if
+         end do
+      else 
+         size = local_nx*local_ny
+         call mpi_recv(out_buff,size,MPI_DOUBLE_PRECISION,IO_id, &
+                tag,MPI_COMM_WORLD,mpp_status,ierr) 
+      end if
+      return
+  end subroutine decompose_data_double
+
+  subroutine write_io_double(in_buff,out_buff)
+      real*8,dimension(:,:):: in_buff, out_buff
+      integer tag, i, status, ierr,size
+      integer ibegin,iend,jbegin,jend
+      if(my_id .ne. IO_id) then
+          size = local_nx*local_ny
+          tag = 2
+          call mpi_send(in_buff,size,MPI_DOUBLE_PRECISION, IO_id,     &
+                tag,MPI_COMM_WORLD,ierr)
+      else
+          do i = 0, numprocs - 1
+            ibegin = startx(i+1)
+            iend   = startx(i+1)+local_nx_size(i+1) -1
+            jbegin = starty(i+1)
+            jend   = starty(i+1)+local_ny_size(i+1) -1
+            if(i .eq. IO_id) then
+               out_buff(ibegin:iend,jbegin:jend) = in_buff 
+            else 
+               size = local_nx_size(i+1)*local_ny_size(i+1)
+               tag = 2
+               call mpi_recv(out_buff(ibegin:iend,jbegin:jend),size,&
+                   MPI_DOUBLE_PRECISION,i,tag,MPI_COMM_WORLD,mpp_status,ierr)
+            end if
+          end do
+      end if
+      return
+  end subroutine write_io_double
+
+  subroutine write_io_double3d(in_buff,out_buff,klevel)
+      integer klevel, k
+      real*8,dimension(:,:,:):: in_buff, out_buff
+      do k = 1, klevel
+         call write_io_double(in_buff(:,k,:),out_buff(:,k,:))
+      end do
+  end subroutine write_io_double3d
+
+  subroutine decompose_data_double3d(in_buff,out_buff,klevel)
+      integer klevel, k
+      real*8,dimension(:,:,:) ::  in_buff,out_buff
+      do k = 1, klevel
+          call decompose_data_double(in_buff(:,k,:),out_buff(:,k,:))
+      end do
+  end subroutine decompose_data_double3d
 
 END MODULE MODULE_MPP_LAND
 
