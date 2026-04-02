@@ -68,15 +68,15 @@ def run_sceua(reps, output):
 
     # Load results and report best
     results  = spotpy.analyser.load_csv_results(output)
-    best_idx = spotpy.analyser.get_minlikeindex(results)
-    best     = results[best_idx]
+    best_idx, best_obj = spotpy.analyser.get_minlikeindex(results)
+    best               = results[best_idx]
 
     print("\n=== Best parameter set ===")
     param_names = ["TLP", "KSAT", "P50", "SPWAI", "SPWVI"]
     for name in param_names:
         val = best[f"par{name}"]
         print(f"  {name:6s} = {val:.4E}")
-    obj = best["like1"]
+    obj = best_obj
     print(f"\n  Objective (−KGE sum) = {obj:.4f}")
     print(f"  → KGE_LH + KGE_PSN  ≈ {-obj:.4f}  (target: 2.0)")
 
