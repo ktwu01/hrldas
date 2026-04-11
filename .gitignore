@@ -27,3 +27,25 @@ tmp_phs_test/
 # Job scheduler logs
 *.out
 *.err
+
+# Model Outputs and Run Directories
+run_*/
+LDASOUT*
+RESTART*
+namelist.hrldas
+
+# IDE and Tool Specific
+.cursor/
+.codex
+.vscode/
+.idea/
+.DS_Store
+
+# Data formats
+*.nc
+*.nc4
+*.grb
+*.grb2
+
+# Jupyter
+.ipynb_checkpoints/
