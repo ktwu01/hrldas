@@ -830,7 +830,7 @@ MODULE MODULE_MPP_LAND
         call mpi_bcast(inout,size,MPI_INTEGER,   &
             IO_id,MPI_COMM_WORLD,ierr)
       call mpp_land_sync()
-    return 
+    return
   end subroutine mpp_land_bcast_int
 
   subroutine mpp_land_bcast_int1d(inout)
@@ -1908,7 +1908,7 @@ MODULE MODULE_MPP_LAND
             iend   = startx(i+1)+local_nx_size(i+1) -1
             jbegin = starty(i+1)
             jend   = starty(i+1)+local_ny_size(i+1) -1
-          
+
             if(my_id .eq. i) then
                out_buff=in_buff(ibegin:iend,jbegin:jend)
             else
@@ -1917,10 +1917,10 @@ MODULE MODULE_MPP_LAND
                   MPI_DOUBLE_PRECISION, i,tag,MPI_COMM_WORLD,ierr)
             end if
          end do
-      else 
+      else
          size = local_nx*local_ny
          call mpi_recv(out_buff,size,MPI_DOUBLE_PRECISION,IO_id, &
-                tag,MPI_COMM_WORLD,mpp_status,ierr) 
+                tag,MPI_COMM_WORLD,mpp_status,ierr)
       end if
       return
   end subroutine decompose_data_double
@@ -1941,8 +1941,8 @@ MODULE MODULE_MPP_LAND
             jbegin = starty(i+1)
             jend   = starty(i+1)+local_ny_size(i+1) -1
             if(i .eq. IO_id) then
-               out_buff(ibegin:iend,jbegin:jend) = in_buff 
-            else 
+               out_buff(ibegin:iend,jbegin:jend) = in_buff
+            else
                size = local_nx_size(i+1)*local_ny_size(i+1)
                tag = 2
                call mpi_recv(out_buff(ibegin:iend,jbegin:jend),size,&
@@ -1986,7 +1986,6 @@ END MODULE MODULE_MPP_LAND
       if(ierr .ne. 0) call mpp_land_abort()
       return
   end ! mpp_land_sync
-
 
 
 

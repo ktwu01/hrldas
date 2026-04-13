@@ -537,7 +537,8 @@ contains
     !   SPWAI  - sapwood area index [m2/m2]
     !   SPWVI  - sapwood volume index [m3/m2]
     !   VEGHT  - vegetation canopy height [m]
-    ! Fields not found remain unchanged (caller sets defaults).
+    ! HRLDAS PHS requires IPHTYP/SPWAI/SPWVI explicitly when BTR_OPTION=4.
+    ! VEGHT remains optional as a canopy-height override.
     implicit none
     character(len=*),       intent(in)    :: wrfinput_flnm
     integer,                intent(in)    :: xstart, xend, ystart, yend
@@ -551,14 +552,14 @@ contains
     real(kind=kind_noahmp), dimension(xstart:xend,ystart:yend) :: xdum
 
     ierr = nf90_open(wrfinput_flnm, NF90_NOWRITE, ncid)
-    if (ierr /= 0) return  ! silently skip if file cannot be opened
+    if (ierr /= 0) stop "PHS: cannot open wrfinput for required IPHTYP/SPWAI/SPWVI/VEGHT fields"
 
     call get_2d_netcdf("IPHTYP", ncid, xdum, units, xstart, xend, ystart, yend, NOT_FATAL, ierr)
     if (ierr == 0) then
        iphtyp = nint(xdum)
        print*, 'PHS: Read IPHTYP from wrfinput, value =', iphtyp(xstart,ystart)
     else
-       print*, 'PHS: Did not find IPHTYP in wrfinput; will use IVGTYP for parameter lookup'
+       stop "PHS: missing required IPHTYP field in wrfinput"
     endif
 
     call get_2d_netcdf("SPWAI", ncid, xdum, units, xstart, xend, ystart, yend, NOT_FATAL, ierr)
@@ -566,7 +567,7 @@ contains
        spwai = xdum
        print*, 'PHS: Read SPWAI from wrfinput, value =', spwai(xstart,ystart)
     else
-       print*, 'PHS: Did not find SPWAI in wrfinput; will use table default for sapwood area index'
+       stop "PHS: missing required SPWAI field in wrfinput"
     endif
 
     call get_2d_netcdf("SPWVI", ncid, xdum, units, xstart, xend, ystart, yend, NOT_FATAL, ierr)
@@ -574,7 +575,7 @@ contains
        spwvi = xdum
        print*, 'PHS: Read SPWVI from wrfinput, value =', spwvi(xstart,ystart)
     else
-       print*, 'PHS: Did not find SPWVI in wrfinput; will use table default for sapwood volume index'
+       stop "PHS: missing required SPWVI field in wrfinput"
     endif
 
     call get_2d_netcdf("VEGHT", ncid, xdum, units, xstart, xend, ystart, yend, NOT_FATAL, ierr)
@@ -1842,6 +1843,7 @@ contains
     endif
     call mpp_land_bcast_int1(ierr)
     call mpp_land_bcast_char(256,units)
+    if(ierr /= 0) return
 #ifdef DOUBLE_PREC
     call decompose_data_double3d(g_array,array,nsoil)
 #else
