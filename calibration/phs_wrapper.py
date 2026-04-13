@@ -22,14 +22,15 @@ import subprocess
 import tempfile
 from collections import defaultdict
 from datetime import datetime
+from pathlib import Path
 
 import netCDF4 as nc
 import numpy as np
 
 # ---------------------------------------------------------------------------
-# Paths — all absolute, adjust if the template location changes
+# Paths — mutable run artifacts come from the current workspace, not ~/regression_test
 # ---------------------------------------------------------------------------
-TEMPLATE_DIR = os.path.expanduser("~/regression_test/phs_v5x_7yr_soilfix")
+REPO_ROOT = Path(__file__).resolve().parents[1]
 LDASIN_DIR   = os.path.expanduser("~/regression_test/US-Syv")
 OBS_FILE     = os.path.expanduser(
     "~/Ori_RPM/AFM24-data/flux_utc/US-Syv_2002010106_2009010105_hur_Flux.nc"
@@ -37,6 +38,85 @@ OBS_FILE     = os.path.expanduser(
 SCRATCH_BASE = "/glade/derecho/scratch/wukoutian/tmp/phs_cal"
 WRFINPUT     = "0.2_wrfinput_phs_1P_plot.nc"
 RESTART_INIT = "RESTART.2002010106_DOMAIN1"
+
+
+def _resolve_override(env_name):
+    value = os.environ.get(env_name)
+    return Path(value).expanduser().resolve() if value else None
+
+
+def _find_first_existing(candidates, description):
+    for candidate in candidates:
+        if candidate.exists():
+            return candidate.resolve()
+    tried = "\n".join(f"  - {path}" for path in candidates)
+    raise FileNotFoundError(f"Could not find {description}. Tried:\n{tried}")
+
+
+def _resolve_template_dir():
+    override = _resolve_override("PHS_CAL_TEMPLATE_DIR")
+    if override is not None:
+        required = [override / "namelist.hrldas", override / WRFINPUT, override / RESTART_INIT]
+        missing = [str(path) for path in required if not path.exists()]
+        if missing:
+            missing_text = "\n".join(f"  - {path}" for path in missing)
+            raise FileNotFoundError(
+                "PHS_CAL_TEMPLATE_DIR is missing required files:\n" + missing_text
+            )
+        return override
+
+    candidates = [
+        REPO_ROOT / "run_globalDP",
+        REPO_ROOT / "run_hybrid",
+    ]
+    return _find_first_existing(
+        [path for path in candidates if (path / "namelist.hrldas").exists()
+         and (path / WRFINPUT).exists()
+         and (path / RESTART_INIT).exists()],
+        "a workspace run template directory with namelist.hrldas, wrfinput, and restart",
+    )
+
+
+def _resolve_workspace_artifacts():
+    template_dir = _resolve_template_dir()
+
+    binary = _resolve_override("PHS_CAL_HRLDAS_EXE")
+    if binary is None:
+        binary = _find_first_existing(
+            [
+                REPO_ROOT / "hrldas" / "run" / "hrldas.exe",
+                template_dir / "hrldas.exe",
+            ],
+            "a workspace hrldas.exe",
+        )
+
+    table_path = _resolve_override("PHS_CAL_NOAHMPTABLE")
+    if table_path is None:
+        table_path = _find_first_existing(
+            [REPO_ROOT / "noahmp" / "parameters" / "NoahmpTable.TBL"],
+            "workspace NoahmpTable.TBL",
+        )
+
+    namelist_path = _resolve_override("PHS_CAL_NAMELIST")
+    if namelist_path is None:
+        namelist_path = template_dir / "namelist.hrldas"
+
+    wrfinput_path = _resolve_override("PHS_CAL_WRFINPUT")
+    if wrfinput_path is None:
+        wrfinput_path = template_dir / WRFINPUT
+
+    restart_path = _resolve_override("PHS_CAL_RESTART")
+    if restart_path is None:
+        restart_path = template_dir / RESTART_INIT
+
+    return {
+        "template_dir": template_dir,
+        "binary": binary,
+        "table": table_path.resolve(),
+        "namelist": namelist_path.resolve(),
+        "wrfinput": wrfinput_path.resolve(),
+        "restart": restart_path.resolve(),
+    }
 
 
 # ---------------------------------------------------------------------------
@@ -157,14 +237,17 @@ def run_phs(tlp, ksat, p50, spwai, spwvi, keep_dir=False):
     Returns:
         float: KGE(LH) + KGE(PSN), range (-inf, 2.0]; or -9999 on failure.
     """
+    artifacts = _resolve_workspace_artifacts()
     os.makedirs(SCRATCH_BASE, exist_ok=True)
     workdir = tempfile.mkdtemp(dir=SCRATCH_BASE, prefix="run_")
 
     try:
         # --- 1. Populate workdir ---
-        for fname in ("hrldas.exe", "namelist.hrldas", WRFINPUT,
-                      "NoahmpTable.TBL", RESTART_INIT):
-            shutil.copy(os.path.join(TEMPLATE_DIR, fname), workdir)
+        shutil.copy(artifacts["binary"], Path(workdir) / "hrldas.exe")
+        shutil.copy(artifacts["namelist"], Path(workdir) / "namelist.hrldas")
+        shutil.copy(artifacts["wrfinput"], Path(workdir) / WRFINPUT)
+        shutil.copy(artifacts["table"], Path(workdir) / "NoahmpTable.TBL")
+        shutil.copy(artifacts["restart"], Path(workdir) / RESTART_INIT)
         os.symlink(LDASIN_DIR, os.path.join(workdir, "US-Syv"))
 
         # --- 2. Fix namelist paths to absolute ---

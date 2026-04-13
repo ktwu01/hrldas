@@ -51,7 +51,7 @@ def test_wrapper():
     if score > -9000:
         print(f"Wrapper OK — KGE_LH + KGE_PSN = {score:.3f}")
     else:
-        print("Wrapper FAILED — check paths and template run directory")
+        print("Wrapper FAILED — check workspace artifact paths and forcing availability")
     return score
 
 
