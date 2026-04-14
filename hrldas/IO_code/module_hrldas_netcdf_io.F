@@ -5,7 +5,8 @@ module module_hrldas_netcdf_io
 #ifdef MPP_LAND
   use module_mpp_land, only:mpp_land_bcast_int1, decompose_data_real, mpp_land_bcast_real1, decompose_data_int, &
                   io_id, global_nx, global_ny, my_id, write_io_real, write_io_int, write_io_real3d,decompose_data_real3d, &
-                   mpp_land_sync,mpp_land_bcast_char,mpp_land_bcast
+                   mpp_land_sync,mpp_land_bcast_char,mpp_land_bcast, &
+                   decompose_data_double, write_io_double, write_io_double3d, decompose_data_double3d, mpp_land_bcast_double1
 #endif
 
 #ifdef _PARALLEL_
@@ -400,8 +401,13 @@ contains
     deallocate (dum2d)
 
 #ifdef MPP_LAND
+#ifdef DOUBLE_PREC
+    call mpp_land_bcast_double1(lon1)
+    call mpp_land_bcast_double1(lat1)
+#else
     call mpp_land_bcast_real1(lon1)
     call mpp_land_bcast_real1(lat1)
+#endif
 #endif
 
 #ifdef _PARALLEL_
@@ -1749,7 +1755,11 @@ contains
     call mpp_land_bcast_char(256,units)
     if(ierr /= 0) return
   !  write(6,*) "xstart,xend, ystart, yend", xstart,xend, ystart, yend
+#ifdef DOUBLE_PREC
+    call decompose_data_double(g_array,array)
+#else
     call decompose_data_real(g_array,array)
+#endif
 #endif
   end subroutine get_2d_netcdf
 
@@ -1834,7 +1844,11 @@ contains
     call mpp_land_bcast_int1(ierr)
     call mpp_land_bcast_char(256,units)
     if(ierr /= 0) return
+#ifdef DOUBLE_PREC
+    call decompose_data_double3d(g_array,array,nsoil)
+#else
     call decompose_data_real3d(g_array,array,nsoil)
+#endif
 #endif
   end subroutine get_netcdf_soillevel
 
@@ -3331,7 +3345,11 @@ contains
     real(kind=kind_noahmp), dimension(:,:), intent(in) :: array
     real(kind=kind_noahmp), dimension(global_nx,global_ny) :: garray
     character(len=*), intent(in) :: name, description, units
+#ifdef DOUBLE_PREC
+    call write_io_double(array,garray)
+#else
     call write_io_real(array,garray)
+#endif
     if(my_id .eq. io_id) then
          call add_to_output_2d_float( garray, name, description, units )
     endif
@@ -3360,7 +3378,11 @@ contains
 
     allocate(garray(global_nx,klevel,global_ny))
 
+#ifdef DOUBLE_PREC
+    call write_io_double3d(array,garray,klevel)
+#else
     call write_io_real3d(array,garray,klevel)
+#endif
     if(my_id .eq. io_id) then
        call add_to_output_3d( garray, name, description, units, snow_or_soil )
     endif
@@ -3823,7 +3845,11 @@ contains
     character(len=*),                                             intent(in) :: name
     character(len=*), optional,                                   intent(in) :: units
     character(len=*), optional,                                   intent(in) :: description
+#ifdef DOUBLE_PREC
+    call write_io_double(array,garray)
+#else
     call write_io_real(array,garray)
+#endif
     if(my_id .eq. IO_id) then
          call add_to_restart_2d_float(garray, name, units, description)
     endif
@@ -3857,7 +3883,11 @@ contains
     klevel = size(array,2)
     allocate(garray(global_nx,klevel,global_ny))
 
+#ifdef DOUBLE_PREC
+       call write_io_double3d(array,garray,klevel)
+#else
        call write_io_real3d(array,garray,klevel)
+#endif
 
     if(my_id .eq. IO_id) then
          call add_to_restart_3d(garray, name, units, description, layers)
@@ -4237,7 +4267,11 @@ contains
       if(my_id .eq. IO_id) then
           call get_from_restart_2d_float(1, global_nx, 1, global_nx, global_ny, name, garray, return_error)
       endif
+#ifdef DOUBLE_PREC
+      call decompose_data_double(garray,array)
+#else
       call decompose_data_real(garray,array)
+#endif
   end subroutine get_from_restart_2d_float_mpp
 
   subroutine get_from_restart_2d_integer_mpp(parallel_xstart, parallel_xend, subwindow_xstart, ixfull, jxfull, name, array, return_error)
@@ -4278,7 +4312,11 @@ contains
           call get_from_restart_3d(1, global_nx, 1, global_nx, global_ny, name, garray, return_error)
       endif
       do k = 1, klevel
+#ifdef DOUBLE_PREC
+         call decompose_data_double(garray(:,k,:),array(:,k,:))
+#else
          call decompose_data_real(garray(:,k,:),array(:,k,:))
+#endif
       end do
       deallocate(garray)
 
