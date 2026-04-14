@@ -9,6 +9,7 @@
 
 # Build config (machine-specific)
 hrldas/user_build_options
+hrldas/user_build_options.*
 
 # Build logs
 *.log
@@ -20,6 +21,7 @@ calibration/calibration_results*.csv
 
 # Nested repo (has its own git history)
 hrldas-dp-dev/
+hrldas-dp-dev copy/
 
 # Temp testing directory
 tmp_phs_test/
