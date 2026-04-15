@@ -559,7 +559,7 @@ contains
        iphtyp = nint(xdum)
        print*, 'PHS: Read IPHTYP from wrfinput, value =', iphtyp(xstart,ystart)
     else
-       stop "PHS: missing required IPHTYP field in wrfinput"
+       print*, 'PHS: IPHTYP not found in wrfinput; will derive from VegType at runtime'
     endif
 
     call get_2d_netcdf("SPWAI", ncid, xdum, units, xstart, xend, ystart, yend, NOT_FATAL, ierr)
@@ -567,7 +567,7 @@ contains
        spwai = xdum
        print*, 'PHS: Read SPWAI from wrfinput, value =', spwai(xstart,ystart)
     else
-       stop "PHS: missing required SPWAI field in wrfinput"
+       print*, 'PHS: SPWAI not found in wrfinput; will use default 0.001 m2/m2'
     endif
 
     call get_2d_netcdf("SPWVI", ncid, xdum, units, xstart, xend, ystart, yend, NOT_FATAL, ierr)
@@ -575,7 +575,7 @@ contains
        spwvi = xdum
        print*, 'PHS: Read SPWVI from wrfinput, value =', spwvi(xstart,ystart)
     else
-       stop "PHS: missing required SPWVI field in wrfinput"
+       print*, 'PHS: SPWVI not found in wrfinput; will derive from table canopy height'
     endif
 
     call get_2d_netcdf("VEGHT", ncid, xdum, units, xstart, xend, ystart, yend, NOT_FATAL, ierr)

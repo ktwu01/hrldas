@@ -22,6 +22,7 @@ calibration/calibration_results*.csv
 # Nested repo (has its own git history)
 hrldas-dp-dev/
 hrldas-dp-dev copy/
+hrldas-dp-dev copy 2/
 
 # Temp testing directory
 tmp_phs_test/
