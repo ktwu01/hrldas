@@ -537,8 +537,9 @@ contains
     !   SPWAI  - sapwood area index [m2/m2]
     !   SPWVI  - sapwood volume index [m3/m2]
     !   VEGHT  - vegetation canopy height [m]
-    ! HRLDAS PHS requires IPHTYP/SPWAI/SPWVI explicitly when BTR_OPTION=4.
-    ! VEGHT remains optional as a canopy-height override.
+    ! HRLDAS PHS prefers IPHTYP/SPWAI/SPWVI from wrfinput when available.
+    ! VEGHT remains an optional canopy-height override, and missing hydraulic
+    ! fields fall back in the transfer layer.
     implicit none
     character(len=*),       intent(in)    :: wrfinput_flnm
     integer,                intent(in)    :: xstart, xend, ystart, yend
