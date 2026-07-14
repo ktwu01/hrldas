@@ -1,5 +1,7 @@
 ### Project Intro
 
+> Rock variant rationale (deep vadose zone / rock moisture, Experiment 2): see `scratchpad-rock.md`.
+
 HRLDAS + Noah‑MP (Fortran) for simulations and Python ML for analysis/training on Derecho/Casper. Keep code safe in Home, run I/O in Scratch, retain results in Work, and promote long‑lived assets to Campaign.
 
 ### Storage Layout (Best Practice)
