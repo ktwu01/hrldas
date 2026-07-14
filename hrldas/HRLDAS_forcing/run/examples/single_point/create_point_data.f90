@@ -238,8 +238,8 @@ close(30)
   iret = nf90_put_var(ncid, var_id_tsk   , skin_temperature      )
   iret = nf90_put_var(ncid, var_id_thick , soil_layer_thickness  )
   iret = nf90_put_var(ncid, var_id_nodes , soil_layer_nodes      )
-  iret = nf90_put_var(ncid, var_id_stemp , soil_temperature      , count = (/1,1,4,1/))
-  iret = nf90_put_var(ncid, var_id_smois , soil_moisture         , count = (/1,1,4,1/))
+  iret = nf90_put_var(ncid, var_id_stemp , soil_temperature      , count = (/1,1,nsoil,1/))
+  iret = nf90_put_var(ncid, var_id_smois , soil_moisture         , count = (/1,1,nsoil,1/))
   
   iret = nf90_close(ncid)
 
